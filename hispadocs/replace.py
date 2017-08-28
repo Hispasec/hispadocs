@@ -2,11 +2,16 @@
 import os
 import tempfile
 import zipfile
+
+from jinja2.environment import Environment
 from lxml import etree
 
 
 CONTENT_FILENAME = 'content.xml'
 TEXT_NAMESPACE = 'urn:oasis:names:tc:opendocument:xmlns:text:1.0'
+
+jinja_env = Environment()
+
 
 class OdtReplace(object):
     def __init__(self, path, variables):
@@ -55,7 +60,7 @@ class OdtReplace(object):
         for node in nodes:
             if node.text is None:
                 continue
-            node.text = node.text.format(**self.variables)
+            node.text = jinja_env.from_string(node.text).render(**self.variables)
         out = etree.tostring(root)
         with open(content_path, 'w') as f:
             f.write(out)

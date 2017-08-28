@@ -18,4 +18,4 @@ def generate(file):
     config = Config(file)
     config.read()
     OdtFiles(config['inputs']).create_output(config['output'])
-    OdtReplace(config['output'], {'foo': 3}).replace()
+    OdtReplace(config['output'], config['vars']).replace()
