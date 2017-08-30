@@ -3,20 +3,36 @@ import os
 import tempfile
 import zipfile
 
-from jinja2.environment import Environment
 from lxml import etree
-
+from ooopy import Transforms as Transforms
+from ooopy.OOoPy import OOoPy
+from ooopy.Transformer import Transformer
 
 CONTENT_FILENAME = 'content.xml'
-TEXT_NAMESPACE = 'urn:oasis:names:tc:opendocument:xmlns:text:1.0'
 
-jinja_env = Environment()
+class OdtFiles(list):
+    def __init__(self, files):
+        super(OdtFiles, self).__init__(files)
+
+    def create_output(self, output_path):
+        o = OOoPy(infile=self[0], outfile=output_path)
+        if len(self) > 1:
+            t = Transformer(
+                o.mimetype,
+                Transforms.get_meta(o.mimetype),
+                Transforms.Concatenate(*(self[1:])),
+                Transforms.renumber_all(o.mimetype),
+                Transforms.set_meta(o.mimetype),
+                Transforms.Fix_OOo_Tag(),
+                Transforms.Manifest_Append()
+            )
+            t.transform(o)
+        o.close()
 
 
-class OdtReplace(object):
-    def __init__(self, path, variables):
+class OdtFile(object):
+    def __init__(self, path):
         self.path = path
-        self.variables = variables
 
     def get_zip_data(self, path=None):
         return zipfile.ZipFile(path or self.path)
@@ -53,17 +69,23 @@ class OdtReplace(object):
                 file_url = os.path.join(directory, file_name)  # The actual name and path
                 outzip.write(file_url, file_name)
 
-    def replace_dir_content(self, directory):
-        content_path = os.path.join(directory, CONTENT_FILENAME)
-        root = etree.parse(open(content_path)).getroot()
-        nodes = root.findall(".//{%s}*" % TEXT_NAMESPACE)
-        for node in nodes:
-            if node.text is None:
-                continue
-            node.text = jinja_env.from_string(node.text).render(**self.variables)
-        out = etree.tostring(root)
+    def read_odt_file(self, filename):
+        directory, zipdata = self.unzip()
+        content_path = os.path.join(directory, filename)
+        # TODO: borrar zip
+        return open(content_path).read()
+
+    def read_content(self):
+        return self.read_odt_file(CONTENT_FILENAME)
+
+    def write_odt_file(self, filename, body):
+        directory, zipdata = self.unzip()
+        content_path = os.path.join(directory, filename)
         with open(content_path, 'w') as f:
-            f.write(out)
+            f.write(body)
+
+    def write_content(self, body):
+        return self.write_odt_file(CONTENT_FILENAME, body)
 
     def replace(self):
         directory, zipdata = self.unzip()

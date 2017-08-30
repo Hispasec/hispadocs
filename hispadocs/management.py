@@ -1,8 +1,8 @@
 import click
 
 from hispadocs.config import Config
-from hispadocs.merge import OdtFiles
-from hispadocs.replace import OdtReplace
+from hispadocs.odt import OdtFiles, OdtFile
+from hispadocs.template import odt_template
 
 
 @click.group()
@@ -18,4 +18,4 @@ def generate(file):
     config = Config(file)
     config.read()
     OdtFiles(config['inputs']).create_output(config['output'])
-    OdtReplace(config['output'], config['vars']).replace()
+    odt_template(config['output'], config['vars'])
