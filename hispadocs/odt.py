@@ -86,8 +86,3 @@ class OdtFile(object):
 
     def write_content(self, body):
         return self.write_odt_file(CONTENT_FILENAME, body)
-
-    def replace(self):
-        directory, zipdata = self.unzip()
-        self.replace_dir_content(directory)
-        self.zip(directory)

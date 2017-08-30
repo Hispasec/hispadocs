@@ -1,0 +1,5 @@
+oooPy-alt
+Jinja2>=2.9.6
+PyYAML>=3.12
+click>=6.7
+lxml>=3.8.0
