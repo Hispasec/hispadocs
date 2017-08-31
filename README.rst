@@ -24,7 +24,7 @@ Imagine you have 3 odt documents and you want to join them. Also, you have varia
     Thank you very much for contracting our services.
     ...
 
-You need the first a **configuration file**. You can call it ``config.yml``.
+You need the first a **configuration file**. You can call it ``config.yml``, for example::
 
 .. code-block:: yaml
 
