@@ -83,6 +83,7 @@ class OdtFile(object):
         content_path = os.path.join(directory, filename)
         with open(content_path, 'w') as f:
             f.write(body)
+        self.zip(directory)
 
     def write_content(self, body):
         return self.write_odt_file(CONTENT_FILENAME, body)
